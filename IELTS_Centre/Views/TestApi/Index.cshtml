@@ -1,0 +1,175 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Fill IELTS Centre Detail With API</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <br />
+                <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
+                    <div class="form-group">
+                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-TeacherName">
+                            Teacher Name <span class="required">*</span>
+                        </label>
+                        <div class="col-md-6 col-sm-6 col-xs-12">
+                            <input type="text" id="TeacherName" required="required" class="form-control col-md-7 col-xs-12" TeacherName="TeacherName">
+                        </div>
+                    </div>
+
+
+                    <div class="ln_solid"></div>
+                    <input type="hidden" id="ID" TeacherName="ID" />
+                    <div class="form-group">
+                        <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                            <button type="submit" class="btn btn-success" id="btn1">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="clearfix"></div>
+<div class="col-md-12 col-sm-12 col-xs-12">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Teacher List</h2>
+
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <div class="table-responsive">
+                <table class="table table-striped jambo_table bulk_action" id="tab1">
+                    <tr class="headings">
+                        <th class="column-title" width="180px"># </th>
+                        <th class="column-title" width="380px">TeacherName </th>
+                        <th class="column-title no-link last" width="240px">
+                            <span class="nobr">Action</span>
+                        </th>
+                    </tr>
+
+                </table>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function AddEditRecord(id, teacherName) {
+        debugger;
+        $("#TeacherName").val(teacherName);
+        $("#ID").val(id);
+    }
+
+    function UpdateRecord() {
+        var TeacherName = $("#TeacherName").val();
+
+        $.ajax({
+            type: "put",
+            contentType: "application/json;charset=utf-8",
+            url: "/api/Teachers_API/" + $("#ID").val(),
+            data: JSON.stringify({
+                ID: $("#ID").val(),
+                TeacherName: $("#TeacherName").val(),
+            }),
+
+            dataType: "JSON",
+
+            success: function (data) {
+                $("#tab1").find("tr:gt(0)").remove();
+                $.getJSON("/api/Teachers_API/", function (data) {
+                    $("#tab1").css("display", "block");
+                    $.each(data, function (key, val) {
+                        $("<tr class='even pointer'><td width='180px'>" + val.id + "</td><td width='180px'>" + val.teacherName + "</td><td width='240px'>" + "<button class='btn btn-warning btn-xs' onclick='AddEditRecord(" + val.id + ',"' + val.teacherName + '"' + ");'" + ">Edit</button> <button class='btn btn-danger btn-xs' onclick='DeleteRecord(" + val.id + ");'" + ">Delete</button>" + "</td></tr>").appendTo($("#tab1"));
+
+                    })
+
+                })
+
+            }
+        });
+    }
+    //Delete
+    function DeleteRecord(ID) {
+        $.ajax({
+
+            type: "DELETE",
+
+            contentType: "application/json;charset=utf-8",
+
+            url: "/api/Teachers_API/" + ID,
+
+            data: JSON.stringify({
+                id: ID,
+            }),
+            dataType: "JSON",
+            success: function (data) {
+                $("#tab1").find("tr:gt(0)").remove();
+                $.getJSON("/api/Teachers_API/", function (data) {
+                    $("#tab1").css("display", "block");
+                    $.each(data, function (key, val) {
+                        $("<tr class='even pointer'><td width='180px'>" + val.id + "</td><td width='180px'>" + val.teacherName + "</td><td width='240px'>" + "<button class='btn btn-warning btn-xs' onclick='AddEditRecord(" + val.id + ',"' + val.teacherName + '"' + ");'" + ">Edit</button> <button class='btn btn-danger btn-xs' onclick='DeleteRecord(" + val.id + ");'" + ">Delete</button>" + "</td></tr>").appendTo($("#tab1"));
+
+                    })
+
+                })
+            }
+        });
+    }
+    $(document).ready(function () {
+        $("#tab1").css("display", "none");
+        $.getJSON("/api/Teachers_API/", function (data) {
+            $("#tab1").css("display", "block");
+            $.each(data, function (key, val) {
+                $("<tr class='even pointer'><td width='180px'>" + val.id + "</td><td width='180px'>" + val.teacherName + "</td><td width='240px'>" + "<button class='btn btn-warning btn-xs' onclick='AddEditRecord(" + val.id + ',"' + val.teacherName + '"' + ");'" + ">Edit</button> <button class='btn btn-danger btn-xs' onclick='DeleteRecord(" + val.id + ");'" + ">Delete</button>" + "</td></tr>").appendTo($("#tab1"));
+
+            });
+        })
+
+        //POST
+        $("#btn1").click(function () {
+            if ($("#ID").val() > 0) {
+                UpdateRecord();
+            }
+            else {
+                var TeacherName = $("#teacherName").val();
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json;charset=utf-8",
+                    url: "/api/Teachers_API/",
+                    data: JSON.stringify({
+                        TeacherName: $("#TeacherName").val(),
+                    }),
+                    dataType: "JSON",
+                    success: function (data) {
+                        $("#ID").val('');
+                        $("#tab1").find("tr:gt(0)").remove();
+                        $.getJSON("/api/Teachers_API/", function (data) {
+                            $("#tab1").css("display", "block");
+                            $.each(data, function (key, val) {
+                                $("<tr class='even pointer'><td width='180px'>" + val.id + "</td><td width='180px'>" + val.teacherName + "</td><td width='240px'>" + "<button class='btn btn-warning btn-xs' onclick='AddEditRecord(" + val.id + ',"' + val.teacherName + '"' + ");'" + ">Edit</button> <button class='btn btn-danger btn-xs' onclick='DeleteRecord(" + val.id + ");'" + ">Delete</button>" + "</td></tr>").appendTo($("#tab1"));
+
+                            })
+
+                        })
+
+
+
+                    }
+                });
+            }
+
+        })
+    });
+
+</script>
+
